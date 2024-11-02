@@ -1,0 +1,35 @@
+doctype html 
+html 
+    head
+        title Login
+        style.
+            #form { display: flex; flex-direction: column; align-items: center; }
+            #input { padding: 10px; margin: 10px; }
+            #send { padding: 10px; margin: 10px; }
+    body
+        form(action="/login" method="POST" id="form")
+            input#username(type="text" name="username" placeholder="Username" autocomplete="off")
+            input#password(type="password" name="password" placeholder="Password")
+            button#send(type="submit") Login
+        script.
+            document.getElementById('form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.token) {
+                        localStorage.setItem('token', data.token);
+                        window.location.href = '/chat';
+                    } else {
+                        alert(data.message);
+                    }
+                });
+            });

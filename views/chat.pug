@@ -1,0 +1,50 @@
+doctype html 
+html 
+    head
+        title Chatroom
+        style.
+            #messages { list-style-type: none; margin: 0; padding: 0; }
+            #messages li { padding: 8px; margin-bottom: 8px; }
+            #form { display: flex;}
+            #input { flex: 1; padding: 10px; }
+            #send { padding: 10px; }
+    body
+        ul#messages
+        form#form(action='')
+            input#input(autocomplete="off")
+            button#send Send
+
+        script(src='/socket.io/socket.io.min.js')
+        script.
+            const socket = io({
+                auth: { token: localStorage.getItem('token') }
+            });
+
+            const form = document.getElementById('form');
+            const input = document.getElementById('input');
+            const messages = document.getElementById('messages');
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (input.value) {
+                    socket.emit('chat message', input.value);
+                    input.value = '';
+                }
+            });
+
+            // Handle incoming chat history
+            socket.on('chat history', function(history) {
+                history.forEach(function(msg) {
+                    const item = document.createElement('li');
+                    item.textContent = msg.user.username + ': ' + msg.content;
+                    messages.appendChild(item);
+                });
+            });
+
+            // Handle new chat messages
+            socket.on('chat message', function(msg) {
+                const item = document.createElement('li');
+                item.textContent = msg.author + ': ' + msg.content;
+                messages.appendChild(item);
+                window.scrollTo(0, document.body.scrollHeight);
+            });
